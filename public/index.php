@@ -22,8 +22,49 @@ $app->get('/', function ($request, $response) {
     // return $response->write('Welcome to Slim!');
 });
 
+$users = ['mike', 'mishel', 'adel', 'keks', 'kamila'];
+
+$app->get('/users', function ($request, $response) use ($users) {
+    $queryParams = $request->getQueryParams();
+    $s = $queryParams['s'];
+    $userDataFilename = __DIR__ . '/../userData.json';
+    $fileData = file_get_contents($userDataFilename);
+    $usersData = json_decode($fileData, true);
+    $params = [
+        'users' => $usersData,
+        's' => $s
+    ];
+    return $this->get('renderer')->render($response, 'users/index.phtml', $params);
+});
+
+$app->get('/users/new', function ($request, $response) {
+    $params = [];
+    return $this->get('renderer')->render($response, 'users/new.phtml', $params);
+});
+
 $app->post('/users', function ($request, $response) {
-    return $response->withStatus(302);
+    $postParams = $request->getParsedBody();
+    $nickname = $postParams['user']['nickname'];
+    $email = $postParams['user']['email'];
+    $userData = [
+        'nickname' => $nickname,
+        'email' => $email
+    ];
+    if ($nickname && $email) {
+        $userDataFilename = __DIR__ . '/../userData.json';
+        $fileData = file_get_contents($userDataFilename);
+        $usersData = json_decode($fileData, true);
+        $usersData[] = $userData;
+        file_put_contents($userDataFilename, json_encode($usersData));
+        return $response->withHeader('Location', '/users')
+            ->withStatus(302);
+    } else {
+        $params = [
+            'nickname' => $nickname,
+            'email' => $email
+        ];
+        return $this->get('renderer')->render($response, 'users/new.phtml', $params);
+    }
 });
 
 $app->get('/courses/{id}', function ($request, $response, array $args) {
@@ -34,9 +75,6 @@ $app->get('/courses/{id}', function ($request, $response, array $args) {
 
 $app->get('/users/{id}', function ($request, $response, $args) {
     $params = ['id' => $args['id'], 'nickname' => 'user-' . $args['id']];
-    // Указанный путь считается относительно базовой директории для шаблонов, заданной на этапе конфигурации
-    // $this доступен внутри анонимной функции благодаря https://php.net/manual/ru/closure.bindto.php
-    // $this в Slim это контейнер зависимостей
     return $this->get('renderer')->render($response, 'users/show.phtml', $params);
 });
 

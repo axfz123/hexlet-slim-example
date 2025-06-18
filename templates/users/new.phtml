@@ -1,0 +1,11 @@
+<form action="/users" method="post">
+    <h1>New User</h1>
+    <hr>
+    <div>
+    Nickname: <input type="text" name="user[nickname]" value="<?= htmlspecialchars($user['nickname']) ?>">
+    </div>
+    <div>
+    Email: <input type="text" name="user[email]" value="<?= htmlspecialchars($user['email']) ?>">
+    </div>
+    <input type="submit" value="Submit">
+</form>
