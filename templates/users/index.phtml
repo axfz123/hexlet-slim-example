@@ -1,3 +1,25 @@
+<div>
+  <h2>Users</h2>
+</div>
+<?php if (isset($flash['success'])): ?>
+<div>
+  <?php foreach($flash['success'] as $message): ?>
+    <div><span style="color: green; font-weight: bold;"><?= $message ?></span></div>
+  <?php endforeach; ?>
+</div>
+<?php endif; ?>
+<?php if (isset($flash['error'])): ?>
+<div>
+  <?php foreach($flash['error'] as $message): ?>
+    <div><span style="color: red; font-weight: bold;"><?= $message ?></span></div>
+  <?php endforeach; ?>
+</div>
+<?php endif; ?>
+<hr>
+<div>
+    <a href="<?= $newUserUrl ?>">Add user</a>
+</div>
+<br>
 <form action="/users" method="get">
   <input type="search" name="s" value="<?= htmlspecialchars($s) ?>" />
   <input type="submit" value="Search" />
@@ -6,7 +28,7 @@
 <ul>
 <?php foreach($users as $user): ?>
     <?php if (str_contains($user['nickname'], $s) || (empty($s))): ?>
-    <li><i><?= $user['nickname'] ?></i></li>
+    <li><a href="<?= $usersUrl ?>/<?= $user['id'] ?>"><?= $user['nickname'] ?></a></li>
     <?php endif; ?>
 <?php endforeach; ?>
 </ul>
