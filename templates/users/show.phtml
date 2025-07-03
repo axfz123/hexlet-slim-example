@@ -1,2 +1,18 @@
-<div><?= htmlspecialchars($user['id']) ?></div>
+<div><a href="/users">All users</a></div>
+<?php if (isset($flash['success'])): ?>
+<div>
+  <?php foreach($flash['success'] as $message): ?>
+    <div><span style="color: green; font-weight: bold;"><?= $message ?></span></div>
+  <?php endforeach; ?>
+</div>
+<?php endif; ?>
+<?php if (isset($flash['error'])): ?>
+<div>
+  <?php foreach($flash['error'] as $message): ?>
+    <div><span style="color: red; font-weight: bold;"><?= $message ?></span></div>
+  <?php endforeach; ?>
+</div>
+<?php endif; ?>
 <div><?= htmlspecialchars($user['nickname']) ?></div>
+<div><?= htmlspecialchars($user['email']) ?></div>
+<div><a href="<?= $userUrl ?>/edit">Edit</a></div>

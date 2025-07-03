@@ -2,10 +2,16 @@
     <h1>New User</h1>
     <hr>
     <div>
-    Nickname: <input type="text" name="user[nickname]" value="<?= htmlspecialchars($user['nickname']) ?>">
+    Nickname: <input type="text" name="user[nickname]" value="<?= htmlspecialchars($userData['nickname']) ?>">
+        <?php if (isset($errors['nickname'])): ?>
+            <div style="color: red;"><?= $errors['nickname'] ?></div>
+        <?php endif ?>
     </div>
     <div>
-    Email: <input type="text" name="user[email]" value="<?= htmlspecialchars($user['email']) ?>">
+    Email: <input type="text" name="user[email]" value="<?= htmlspecialchars($userData['email']) ?>">
+        <?php if (isset($errors['email'])): ?>
+            <div style="color: red;"><?= $errors['email'] ?></div>
+        <?php endif ?>
     </div>
     <input type="submit" value="Submit">
 </form>
