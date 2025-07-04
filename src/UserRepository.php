@@ -44,4 +44,18 @@ class UserRepository
         }
         throw new \Exception('User id not found in repository');
     }
+
+    public function delete($id): void
+    {
+        $fileData = file_get_contents(self::USER_DATA_FILE);
+        $usersData = json_decode($fileData, true) ?? [];
+
+        if (array_key_exists($id, $usersData)) {
+            unset($usersData[$id]);
+            file_put_contents(self::USER_DATA_FILE, json_encode($usersData, JSON_FORCE_OBJECT));
+            return;
+        }
+
+        throw new \Exception('User id not found in repository');
+    }
 }

@@ -146,4 +146,32 @@ $app->patch('/users/{id}', function ($request, $response, array $args) use ($rou
     return $this->get('renderer')->render($response, 'users/edit.phtml', $params);
 });
 
+$app->get('/users/{id}/delete', function ($request, $response, $args) use ($router) {
+    $id = $args['id'];
+    $isInt = (string) (int) $id === (string) $id;
+    if (!$isInt) {
+        return $response->withStatus(404);
+    }
+
+    $userData['id'] = $id;
+
+    $params = [
+        'user' => $userData
+    ];
+    return $this->get('renderer')->render($response, 'users/delete.phtml', $params);
+});
+
+$app->delete('/users/{id}', function ($request, $response, array $args) use ($router)  {
+    $id = $args['id'];
+    $userData = $this->get('repo')->find($id);
+    if (empty($userData)) {
+        return $response->withStatus(404);
+    }
+    $this->get('repo')->delete($id);
+    $this->get('flash')->addMessage('success', 'User has been deleted');
+    $url = $router->urlFor('users');
+    return $response->withHeader('Location', $url)
+        ->withStatus(302);
+});
+
 $app->run();
