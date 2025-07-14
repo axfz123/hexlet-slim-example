@@ -46,7 +46,7 @@ $app->get('/', function ($request, $response) {
 
 $app->get('/users', function ($request, $response) use ($router) {
     $queryParams = $request->getQueryParams();
-    $s = $queryParams['s'];
+    $s = $queryParams['s'] ?? '';
     $usersData = $this->get('repo')->all();
     $usersUrl = $router->urlFor('users');
     $newUserUrl = $router->urlFor('newuser');
