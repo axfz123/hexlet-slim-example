@@ -8,3 +8,5 @@ logs
 *.cache
 build
 coverage.xml
+database.sqlite
+userData.json

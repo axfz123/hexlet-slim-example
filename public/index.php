@@ -7,6 +7,7 @@ use Slim\Factory\AppFactory;
 use Slim\Middleware\MethodOverrideMiddleware;
 use DI\Container;
 
+use App\CarRepository;
 use App\UserRepository;
 use App\UserValidator;
 
@@ -22,6 +23,15 @@ $container->set('flash', function () {
 $container->set('repo', function () {
     return new UserRepository();
 });
+$container->set(\PDO::class, function () {
+    $conn = new \PDO('sqlite:database.sqlite');
+    $conn->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
+    return $conn;
+});
+
+$initFilePath = implode('/', [dirname(__DIR__), 'init.sql']);
+$initSql = file_get_contents($initFilePath);
+$container->get(\PDO::class)->exec($initSql);
 
 $app = AppFactory::createFromContainer($container);
 $app->addErrorMiddleware(true, true, true);
@@ -42,6 +52,7 @@ $app->get('/users', function ($request, $response) use ($router) {
     $newUserUrl = $router->urlFor('newuser');
     $messages = $this->get('flash')->getMessages();
     $params = [
+        'loggedIn' => $_SESSION['loggedIn'] ?? false,
         'users' => $usersData,
         'usersUrl' => $usersUrl,
         'newUserUrl' => $newUserUrl,
@@ -173,5 +184,85 @@ $app->delete('/users/{id}', function ($request, $response, array $args) use ($ro
     return $response->withHeader('Location', $url)
         ->withStatus(302);
 });
+
+$app->get('/login', function ($request, $response) {
+    $params = [
+        'flash' => $this->get('flash')->getMessages()
+    ];
+    return $this->get('renderer')->render($response, 'users/login.phtml', $params);
+})->setName('login');
+
+$app->post('/login', function ($request, $response) use ($router) {
+    $requestData = $request->getParsedBody();
+    $email =  $requestData['email'];
+    $userData = $this->get('repo')->findByEmail($email);
+    if (empty($userData)) {
+        $this->get('flash')->addMessage('error', 'Email not found');
+        return $response->withHeader('Location', $router->urlFor('login'))->withStatus(302);
+    }
+    $_SESSION['loggedIn'] = true;
+    $this->get('flash')->addMessage('success', 'Successfully logged in');
+    return $response->withHeader('Location', $router->urlFor('users'))->withStatus(302);
+});
+
+$app->post('/logout', function ($request, $response) use ($router) {
+    $_SESSION['loggedIn'] = false;
+    return $response->withHeader('Location', $router->urlFor('users'))->withStatus(302);
+});
+
+$app->get('/cars', function ($request, $response) {
+    $carRepository = $this->get(CarRepository::class);
+    $cars = $carRepository->getEntities();
+
+    $messages = $this->get('flash')->getMessages();
+
+    $params = [
+        'cars' => $cars,
+        'flash' => $messages
+    ];
+
+    return $this->get('renderer')->render($response, 'cars/index.phtml', $params);
+})->setName('cars.index');
+
+$app->get('/cars/{id}', function ($request, $response, $args) {
+    $carRepository = $this->get(CarRepository::class);
+    $id = $args['id'];
+    $car = $carRepository->find($id);
+
+    if (is_null($car)) {
+        return $response->write('Page not found')->withStatus(404);
+    }
+
+    $messages = $this->get('flash')->getMessages();
+
+    $params = [
+        'car' => $car,
+        'flash' => $messages
+    ];
+
+    return $this->get('renderer')->render($response, 'cars/show.phtml', $params);
+})->setName('cars.show');
+
+$app->post('/cars', function ($request, $response) use ($router) {
+    $carRepository = $this->get(CarRepository::class);
+    $carData = $request->getParsedBodyParam('car');
+
+    $validator = new CarValidator();
+    $errors = $validator->validate($carData);
+
+    if (count($errors) === 0) {
+        $car = Car::fromArray([$carData['make'], $carData['model']]);
+        $carRepository->save($car);
+        $this->get('flash')->addMessage('success', 'Car was added successfully');
+        return $response->withRedirect($router->urlFor('cars.index'));
+    }
+
+    $params = [
+        'car' => $carData,
+        'errors' => $errors
+    ];
+
+    return $this->get('renderer')->render($response->withStatus(422), 'cars/new.phtml', $params);
+})->setName('cars.store');
 
 $app->run();

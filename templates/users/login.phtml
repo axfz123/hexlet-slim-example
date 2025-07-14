@@ -1,0 +1,21 @@
+<h1>Login</h1>
+
+<?php if (isset($flash['success'])): ?>
+    <div>
+        <?php foreach($flash['success'] as $message): ?>
+            <div><span style="color: green; font-weight: bold;"><?= $message ?></span></div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
+<?php if (isset($flash['error'])): ?>
+    <div>
+        <?php foreach($flash['error'] as $message): ?>
+            <div><span style="color: red; font-weight: bold;"><?= $message ?></span></div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
+
+<form action="/login" method="post">
+    <input type="text" name="email">
+    <input type="submit" value=" Login ">
+</form>

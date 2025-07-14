@@ -22,6 +22,18 @@ class UserRepository
         return null;
     }
 
+    public function findByEmail(string $email): ?array
+    {
+        $fileData = file_get_contents(self::USER_DATA_FILE);
+        $usersData = json_decode($fileData, true);
+        foreach ($usersData as $userData) {
+            if ($userData['email'] === $email) {
+                return $userData;
+            }
+        }
+        return null;
+    }
+
     public function save(array $userData): void
     {
         $fileData = file_get_contents(self::USER_DATA_FILE);

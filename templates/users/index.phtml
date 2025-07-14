@@ -1,5 +1,15 @@
 <div>
+    <a href="/login">Login</a>
+</div>
+<div>
   <h2>Users</h2>
+</div>
+<div>
+    <?php if ($loggedIn): ?>
+    <form action="/logout" method="post">
+        <input type="submit" value="Logout">
+    </form>
+    <?php endif ?>
 </div>
 <?php if (isset($flash['success'])): ?>
 <div>
