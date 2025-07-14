@@ -4,7 +4,7 @@ namespace App;
 
 class UserRepository
 {
-    const string USER_DATA_FILE = __DIR__ . '/../userData.json';
+    const USER_DATA_FILE = __DIR__ . '/../userData.json';
 
     public function all(): array
     {
